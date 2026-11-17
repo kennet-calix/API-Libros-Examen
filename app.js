@@ -74,6 +74,83 @@ app.post('/libros', (req, res)=>{
     }
 });
 
+ // PUT: Actualizar un libro
+app.put('/libros/:id',(req, res)=>{
+    const id = Number(req.params.id);
+    const libro = req.body;
+
+    if(!Number.isInteger(id)){
+        return res.status(400).json({
+            status:400,
+            message:"El ID debe ser un numero entero"
+        });
+    }
+
+    if(!libro || typeof libro !== 'object' ||
+       Array.isArray(libro)){
+        return res.status(400).json({
+            status:400,
+            message:"Debe enviar los datos del libro"
+        });
+    }
+
+    let isBook = false;
+    let libroActualizado;
+
+    libros.forEach(registro => {
+        if(registro.id === id){
+            isBook = true;
+            libroActualizado = registro;
+        }
+    });
+
+    if(!isBook){
+        return res.status(404).json({
+            status:404,
+            message:"No se encontraron registros"
+        });
+    }
+
+    // Validar los campos enviados
+    if((libro.titulo !== undefined &&
+        (typeof libro.titulo !== 'string' ||
+         !libro.titulo.trim())) ||
+       (libro.autor !== undefined &&
+        (typeof libro.autor !== 'string' ||
+         !libro.autor.trim())) ||
+       (libro.anioPublicacion !== undefined &&
+        !Number.isInteger(libro.anioPublicacion)) ||
+       (libro.estado !== undefined &&
+        (typeof libro.estado !== 'string' ||
+         !libro.estado.trim()))){
+
+        return res.status(400).json({
+            status:400,
+            message:"Datos no validos..."
+        });
+    }
+
+    // Actualizar solo los campos enviados
+    if(libro.titulo !== undefined){
+        libroActualizado.titulo = libro.titulo;
+    }
+
+    if(libro.autor !== undefined){
+        libroActualizado.autor = libro.autor;
+    }
+
+    if(libro.anioPublicacion !== undefined){
+        libroActualizado.anioPublicacion = libro.anioPublicacion;
+    }
+
+    if(libro.estado !== undefined){
+        libroActualizado.estado = libro.estado;
+    }
+
+    res.status(200).json({status:200,message:"success",data:libroActualizado
+    });
+});
+
 app.listen(PORT, ()=>{
     console.log(`El servidor esta ejecutando en http://localhost:${PORT}`);
 });
